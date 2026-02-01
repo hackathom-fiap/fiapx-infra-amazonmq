@@ -13,5 +13,5 @@ variable "broker_name" {
 variable "broker_instance_type" {
   description = "Tipo de instância para o broker."
   type        = string
-  default     = "mq.t3.micro"
+  default     = "mq.t4g.micro"
 }
