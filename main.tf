@@ -18,9 +18,9 @@ resource "aws_secretsmanager_secret_version" "mq_password" {
 # Cria o broker Amazon MQ para RabbitMQ
 resource "aws_mq_broker" "rabbitmq" {
   broker_name        = var.broker_name
-        engine_type        = "RabbitMQ"
-        engine_version     = "3.13"
-  host_instance_type = var.broker_instance_type
+              engine_type        = "RabbitMQ"
+              engine_version     = "3.13"
+              auto_minor_version_upgrade = true  host_instance_type = var.broker_instance_type
   deployment_mode    = "SINGLE_INSTANCE"
   publicly_accessible = true # Necessário para que a aplicação possa se conectar
 
