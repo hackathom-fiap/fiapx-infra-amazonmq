@@ -32,7 +32,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: ./terraform # Indica que os comandos devem rodar na pasta terraform
+        working-directory: ./ # Indica que os comandos devem rodar na pasta terraform
 
     steps:
       - name: Checkout
