@@ -2,7 +2,8 @@
 resource "random_password" "mq_password" {
   length           = 16
   special          = true
-  override_special = "!@#$&*()_+-=[]{}|'"
+  # Reduced special characters to avoid potential issues with RabbitMQ/Amazon MQ's PLAIN auth mechanism
+  override_special = "!@#$%&*-+"
 }
 
 # Armazena a senha gerada no AWS Secrets Manager
