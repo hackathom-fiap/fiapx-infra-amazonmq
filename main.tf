@@ -1,6 +1,6 @@
 # Gera uma senha aleatória para o usuário do RabbitMQ
 resource "random_password" "mq_password" {
-  length           = 16
+  length           = 17 # Increased length to force new password generation
   special          = true
   # Reduced special characters to avoid potential issues with RabbitMQ/Amazon MQ's PLAIN auth mechanism
   override_special = "!@#$%&*-+"
