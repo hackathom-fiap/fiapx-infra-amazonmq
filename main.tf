@@ -60,7 +60,7 @@ resource "aws_mq_broker" "rabbitmq" {
   auto_minor_version_upgrade = true
   host_instance_type         = var.broker_instance_type
   deployment_mode            = "SINGLE_INSTANCE"
-  publicly_accessible        = true
+  publicly_accessible        = false # Alterado para false para permitir security_groups
 
   user {
     username = "user"
