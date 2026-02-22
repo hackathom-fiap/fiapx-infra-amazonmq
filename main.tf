@@ -64,7 +64,7 @@ resource "aws_mq_broker" "rabbitmq" {
   publicly_accessible        = false # Alterado para false para permitir security_groups
 
   user {
-    username = "user"
+    username = "appuser" # Changed username
     password = random_password.mq_password.result
   }
 
