@@ -7,7 +7,7 @@ resource "random_password" "mq_password" {
 
 # Armazena a senha gerada no AWS Secrets Manager
 resource "aws_secretsmanager_secret" "mq_password" {
-  name = "${var.broker_name}-password"
+  name = "${var.broker_name}-password-v2" # Changed secret name to avoid conflict
 }
 
 
