@@ -16,26 +16,59 @@ resource "aws_secretsmanager_secret_version" "mq_password" {
   secret_string = random_password.mq_password.result
 }
 
+# Busca os outputs do estado do Terraform do EKS
+data "terraform_remote_state" "eks" {
+  backend = "s3"
+  config = {
+    bucket = "meu-eks-terraform-state"
+    key    = "soat-tech-challenge/hackathon-eks.tfstate"
+    region = var.aws_region
+  }
+}
+
+# Obtém dados do security group dos nós do EKS para descobrir a VPC ID
+data "aws_security_group" "eks_node_sg_data" {
+  id = data.terraform_remote_state.eks.outputs.node_security_group_id
+}
+
+# Cria um security group específico para o Amazon MQ
+resource "aws_security_group" "mq_sg" {
+  name        = "${var.broker_name}-sg"
+  description = "Security group para o broker Amazon MQ"
+  vpc_id      = data.aws_security_group.eks_node_sg_data.vpc_id
+
+  tags = {
+    Name = "${var.broker_name}-sg"
+  }
+}
+
+# Regra para permitir acesso dos nós do EKS ao broker na porta AMQPS
+resource "aws_security_group_rule" "eks_to_mq" {
+  type              = "ingress"
+  from_port         = 5671
+  to_port           = 5671
+  protocol          = "tcp"
+  security_group_id = aws_security_group.mq_sg.id
+  source_security_group_id = data.terraform_remote_state.eks.outputs.node_security_group_id
+}
+
 # Cria o broker Amazon MQ para RabbitMQ
 resource "aws_mq_broker" "rabbitmq" {
-  broker_name        = var.broker_name
-              engine_type        = "RabbitMQ"
-      engine_version     = "3.13"
-      auto_minor_version_upgrade = true
-      host_instance_type = var.broker_instance_type
-  deployment_mode    = "SINGLE_INSTANCE"
-  publicly_accessible = true # Necessário para que a aplicação possa se conectar
+  broker_name                = var.broker_name
+  engine_type                = "RabbitMQ"
+  engine_version             = "3.13"
+  auto_minor_version_upgrade = true
+  host_instance_type         = var.broker_instance_type
+  deployment_mode            = "SINGLE_INSTANCE"
+  publicly_accessible        = true
 
   user {
-    username = "user" # Mantendo o usuário 'user' como na config da app
+    username = "user"
     password = random_password.mq_password.result
   }
 
-  # É crucial configurar um security group que permita acesso
-  # à porta 5671 (AMQPS) a partir das suas aplicações.
-  # Por simplicidade, estamos usando o security group default da VPC.
-  # Em produção, um security group específico deve ser criado e referenciado.
-  # security_groups = [aws_security_group.mq_sg.id]
+  # Associa o broker ao security group criado
+  security_groups = [aws_security_group.mq_sg.id]
 
   # Configuração de logs para CloudWatch
   logs {
